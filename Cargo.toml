@@ -1,3 +1,7 @@
+[workspace]
+members = [".", "crates/dsp-radio-protocol", "crates/dsp-radio-broker"]
+resolver = "2"
+
 [package]
 name = "dsp_radio"
 version = "0.1.2"

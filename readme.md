@@ -17,7 +17,6 @@ DSPradio provides a unified interface for iterating (synchronously) and streamin
 
 The library intentionally does not include demodulation, focusing instead on providing a consistent interface over various sources.
 
-The name "DSPradio" is a playful nod to DSP (Digital Signal Processing), and tips its hat to <https://www.youtube.com/watch?v=-q93wc3-deU>.
 
 ## What are I/Q Samples?
 
@@ -114,28 +113,99 @@ async fn main() -> dsp_radio::Result<()> {
 }
 ```
 
+### Remote RTL-SDR via rtl_tcp
+
+Connect to a remote RTL-SDR device running `rtl_tcp` server - no feature flags required:
+
+```rust ignore
+use dsp_radio::{IqSource, Gain};
+
+fn main() -> dsp_radio::Result<()> {
+    // Connect using URL-style configuration
+    let config: dsp_radio::DeviceConfig =
+        "rtl_tcp://192.168.1.100:1234?freq=1090M&rate=2.4M&gain=auto".parse()?;
+
+    let mut source = IqSource::from_device_config(config)?;
+
+    for samples in source {
+        let samples = samples?;
+        println!("Received {} samples from remote SDR", samples.len());
+    }
+
+    Ok(())
+}
+```
+
+Or using the direct constructor:
+
+```rust ignore
+use dsp_radio::{IqSource, Gain};
+
+let source = IqSource::from_rtl_tcp(
+    "192.168.1.100",  // Host running rtl_tcp
+    1234,             // Port (default: 1234)
+    1090_000_000,     // 1090 MHz
+    2_400_000,        // 2.4 MS/s
+    Gain::Auto,
+)?;
+```
+
+To start an rtl_tcp server on a Raspberry Pi or remote machine:
+
+```bash
+rtl_tcp -a 0.0.0.0 -p 1234
+```
+
 ### More data sources
 
 DSPradio supports various data sources: the following table summarizes the available sources.
 
 Methods are available in both synchronous (`IqSource`) and asynchronous (`AsyncIqSource`) versions.
 
-| **Frontend**   | Method name                    | Optional feature | Identifier       |
-| -------------- | ------------------------------ | ---------------- | ---------------- |
-| I/Q File       | `[Async]IqSource::from_file`   |                  | file name        |
-| Standard Input | `[Async]IqSource::from_stdin`  |                  |
-| TCP socket     | `[Async]IqSource::from_tcp`    |                  | address and port |
-| RTL-SDR        | `[Async]IqSource::from_rtlsdr` | `rtlsdr`         | device index     |
-| Soapy          | `[Async]IqSource::from_soapy`  | `soapy`          | device arguments |
-| Adalm-Pluto    | `[Async]IqSource::from_pluto`  | `pluto`          | URI              |
+| **Frontend**   | Method name                     | Optional feature | Identifier       |
+| -------------- | ------------------------------- | ---------------- | ---------------- |
+| I/Q File       | `[Async]IqSource::from_file`    |                  | file name        |
+| Standard Input | `[Async]IqSource::from_stdin`   |                  |                  |
+| TCP socket     | `[Async]IqSource::from_tcp`     |                  | address and port |
+| rtl_tcp        | `[Async]IqSource::from_rtl_tcp` |                  | host and port    |
+| RTL-SDR        | `[Async]IqSource::from_rtlsdr`  | `rtlsdr`         | device index     |
+| Soapy          | `[Async]IqSource::from_soapy`   | `soapy`          | device arguments |
+| Adalm-Pluto    | `[Async]IqSource::from_pluto`   | `pluto`          | URI              |
 
 All samples are returned as `Complex<f32>` values, regardless of the source.
 
-- The `rtlsdr` feature enables support for RTL-SDR devices (DVB-T dongles). It is based on the [`rtl-sdr-rs`](https://crates.io/crates/rtl-sdr-rs) crate which is a pure Rust implementaiton of the RTL-SDR driver.
+- The **rtl_tcp** source connects to remote RTL-SDR devices via the rtl_tcp protocol. No feature flag needed - it uses only standard library networking. Perfect for Raspberry Pi setups or distributed SDR networks.
+- The `rtlsdr` feature enables support for RTL-SDR devices (DVB-T dongles). It is based on the [`rtl-sdr-rs`](https://crates.io/crates/rtl-sdr-rs) crate which is a pure Rust implementation of the RTL-SDR driver.
 - The `soapy` feature enables support for SoapySDR-compatible devices (HackRF, LimeSDR, BladeRF, etc.). It is based on the [`soapysdr`](https://crates.io/crates/soapysdr) crate which provides Rust bindings to the SoapySDR C++ library. **The SoapySDR library must be installed separately**.
 - The `pluto` feature enables support for Adalm-Pluto devices. It is based on the [`pluto-sdr`](https://crates.io/crates/pluto-sdr) crate which provides Rust bindings to the libiio C library. **The libiio library must be installed separately**.
 
 Contributions to include more SDR frontends (LimeSDR, HackRF, etc.) **or to port existing ones to pure Rust implementations** are welcome.
+
+### Device URL Configuration
+
+DSPradio supports URL-style device configuration for easy parsing and serialization:
+
+```rust ignore
+use dsp_radio::DeviceConfig;
+
+// Parse URL into device configuration
+let config: DeviceConfig = "rtl_tcp://pi.local:1234?freq=1090M&rate=2.4M&gain=auto".parse()?;
+
+// Create source from config
+let source = dsp_radio::IqSource::from_device_config(config)?;
+```
+
+Supported URL schemes:
+
+| Scheme | Example |
+|--------|---------|
+| `rtlsdr://` | `rtlsdr://0?freq=1090M&rate=2.4M&gain=auto` |
+| `rtl_tcp://` | `rtl_tcp://192.168.1.100:1234?freq=1090M&rate=2.4M&gain=40` |
+| `soapy://` | `soapy://driver=hackrf?freq=433M&rate=2M&gain=20` |
+| `pluto://` | `pluto://ip:192.168.2.1?freq=1090M&rate=2.4M&gain=40` |
+| `plutoip://` | `plutoip://192.168.2.1?freq=1090M&rate=2.4M` |
+
+SI suffixes are supported: `k` (kilo), `M` (mega), `G` (giga). For example, `freq=1090M` = 1,090,000,000 Hz.
 
 ## Sync vs Async: Which should I use?
 
@@ -202,6 +272,14 @@ let source = IqSource::from_file(path, freq, rate, 65536, format)?;
 - Network latency affects performance for IP-connected devices
 - Use USB 3.0 connections when possible
 
+**rtl_tcp (remote) tips**:
+
+- Network bandwidth: 2.4 MS/s Cu8 = ~4.8 MB/s sustained throughput
+- Use wired Ethernet for reliable high-rate streaming
+- WiFi works for lower sample rates (< 1 MS/s)
+- Consider running rtl_tcp on a Raspberry Pi for remote antenna placement
+- Supports runtime frequency/gain changes without reconnecting
+
 ### Format Considerations
 
 Different I/Q formats have different performance characteristics:
@@ -259,6 +337,26 @@ To list available Adalm-Pluto devices:
 ```bash
 iio_info -s
 ```
+
+### rtl_tcp Connection Issues
+
+To test if an rtl_tcp server is reachable:
+
+```bash
+# Check if server is running and port is open
+nc -zv 192.168.1.100 1234
+
+# Start rtl_tcp server on remote host
+rtl_tcp -a 0.0.0.0 -p 1234
+
+# With specific device index (if multiple RTL-SDRs)
+rtl_tcp -a 0.0.0.0 -p 1234 -d 0
+```
+
+Common issues:
+- **Connection refused**: rtl_tcp not running or firewall blocking port
+- **Invalid magic**: Server isn't rtl_tcp (wrong port or different protocol)
+- **Timeout**: Network latency or server overloaded
 
 ## Finding I/Q Sample Files
 

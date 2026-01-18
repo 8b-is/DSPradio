@@ -1,0 +1,39 @@
+[package]
+name = "dsp-radio-broker"
+version = "0.1.0"
+edition = "2024"
+authors = ["Christopher Chenoweth <git@8b.is>", "Aye <aye@8b.is>"]
+license = "MIT"
+description = "SDR resource broker daemon for DSPradio"
+repository = "https://github.com/8bit-wraith/DSPradio"
+
+[[bin]]
+name = "dsp-radio-broker"
+path = "src/main.rs"
+
+[dependencies]
+# Workspace crates
+dsp-radio-protocol = { path = "../dsp-radio-protocol" }
+dsp_radio = { path = "../..", features = ["rtlsdr"] }
+
+# Async runtime
+tokio = { version = "1.48", features = ["full"] }
+
+# Web framework
+axum = { version = "0.8", features = ["ws"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Utilities
+uuid = { version = "1.0", features = ["v4", "serde"] }
+thiserror = "2.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+clap = { version = "4.5", features = ["derive", "env"] }
+
+# mDNS (re-export from protocol)
+mdns-sd = "0.11"
