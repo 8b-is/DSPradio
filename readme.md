@@ -1,8 +1,8 @@
 <div align="center">
-  <img src="logo.png" alt="Desperado Logo" width="200"/>
+  <img src="logo.png" alt="DSPradio Logo" width="200"/>
 </div>
 
-# Desperado
+# DSPradio
 
 _A unified Rust library for reading I/Q samples from files, SDR devices, and streams_
 
@@ -11,13 +11,13 @@ _A unified Rust library for reading I/Q samples from files, SDR devices, and str
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/8bit-wraith/DSPradio/workflows/Rust/badge.svg)](https://github.com/8bit-wraith/DSPradio/actions)
 
-Desperado is a library designed to factorize and reuse code for reading I/Q samples from files, SDR devices, and other sources.
+DSPradio is a library designed to factorize and reuse code for reading I/Q samples from files, SDR devices, and other sources.
 
-Desperado provides a unified interface for iterating (synchronously) and streaming (asynchronously) complex I/Q samples in `Complex<f32>` format.
+DSPradio provides a unified interface for iterating (synchronously) and streaming (asynchronously) complex I/Q samples in `Complex<f32>` format.
 
 The library intentionally does not include demodulation, focusing instead on providing a consistent interface over various sources.
 
-The name "Desperado" is a playful nod to DSP (Digital Signal Processing), and tips its hat to <https://www.youtube.com/watch?v=-q93wc3-deU>.
+The name "DSPradio" is a playful nod to DSP (Digital Signal Processing), and tips its hat to <https://www.youtube.com/watch?v=-q93wc3-deU>.
 
 ## What are I/Q Samples?
 
@@ -28,11 +28,11 @@ I/Q (In-phase/Quadrature) samples are the fundamental representation of radio si
 
 Together, I and Q samples capture both the amplitude and phase information of a radio signal, allowing software to process, demodulate, and analyze RF signals that have been digitized by SDR hardware.
 
-Desperado abstracts away the complexity of reading these samples from various sources (files, devices, network streams), providing a consistent interface regardless of the source or format (8-bit, 16-bit, float, etc.).
+DSPradio abstracts away the complexity of reading these samples from various sources (files, devices, network streams), providing a consistent interface regardless of the source or format (8-bit, 16-bit, float, etc.).
 
 ## Installation
 
-Add Desperado to your `Cargo.toml`:
+Add DSPradio to your `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -116,7 +116,7 @@ async fn main() -> dsp_radio::Result<()> {
 
 ### More data sources
 
-Desperado supports various data sources: the following table summarizes the available sources.
+DSPradio supports various data sources: the following table summarizes the available sources.
 
 Methods are available in both synchronous (`IqSource`) and asynchronous (`AsyncIqSource`) versions.
 
@@ -139,7 +139,7 @@ Contributions to include more SDR frontends (LimeSDR, HackRF, etc.) **or to port
 
 ## Sync vs Async: Which should I use?
 
-Desperado provides both synchronous (`IqSource`) and asynchronous (`AsyncIqSource`) interfaces. Here's how to choose:
+DSPradio provides both synchronous (`IqSource`) and asynchronous (`AsyncIqSource`) interfaces. Here's how to choose:
 
 Use Synchronous (`IqSource`) when:
 
@@ -285,7 +285,7 @@ SoapySDRUtil --rate=2.4e6 --freq=1090e6 --output=adsb_sample.iq
 
 ### File Formats
 
-Desperado supports raw I/Q files in various formats:
+DSPradio supports raw I/Q files in various formats:
 
 - **Cu8** (Complex unsigned 8-bit): Most common for RTL-SDR, 2 bytes per sample
 - **Cs8** (Complex signed 8-bit): 2 bytes per sample
@@ -301,7 +301,7 @@ Contributions are welcome! Here are some ways you can help:
 - **Improve documentation**: Fix typos, add examples, clarify explanations
 - **Report bugs**: Open an issue with details and reproduction steps
 - **Add tests**: Help improve test coverage
-- **Share your project**: Using Desperado? Add it to the "Projects Using Desperado" section!
+- **Share your project**: Using DSPradio? Add it to the "Projects Using DSPradio" section!
 
 Please ensure:
 

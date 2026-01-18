@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Desperado** (`dsp_radio` crate) is a Rust library for reading I/Q samples from files, SDR devices, and streams. It provides a unified interface for both synchronous (`IqSource` + `Iterator`) and asynchronous (`IqAsyncSource` + `Stream`) I/Q data access, outputting normalized `Complex<f32>` values regardless of source format.
+**DSPradio** (`dsp_radio` crate) is a Rust library for reading I/Q samples from files, SDR devices, and streams. It provides a unified interface for both synchronous (`IqSource` + `Iterator`) and asynchronous (`IqAsyncSource` + `Stream`) I/Q data access, outputting normalized `Complex<f32>` values regardless of source format.
 
 ## Build & Development Commands
 
